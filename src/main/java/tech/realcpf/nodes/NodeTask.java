@@ -1,5 +1,6 @@
 package tech.realcpf.nodes;
 
+import tech.realcpf.core.Run;
 import tech.realcpf.core.Task;
 
 import java.util.Arrays;
@@ -7,16 +8,18 @@ import java.util.concurrent.TimeUnit;
 
 public class NodeTask extends Task {
 
-
-  public NodeTask(String name) {
+  private final Run run;
+  public NodeTask(String name,Run run) {
     super(name);
+    this.run = run;
   }
 
   @Override
   public Object run(Object... params) {
     GLOGGER.log("start run with params " + Arrays.toString(params));
     try {
-      TimeUnit.SECONDS.sleep(10);
+      run.run(params);
+      TimeUnit.SECONDS.sleep(1);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }

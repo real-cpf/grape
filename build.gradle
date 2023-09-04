@@ -1,19 +1,95 @@
 plugins {
-    id 'java'
+  id 'java'
+  id 'java-library'
+  id 'maven-publish'
+  id 'signing'
 }
 
-group = 'tech.realcpf'
-version = '1.0-SNAPSHOT'
+group = "tech.realcpf.grape"
+archivesBaseName = "grape"
+version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenCentral()
+  mavenCentral()
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      artifactId = 'grape'
+      from components.java
+      versionMapping {
+        usage('java-api') {
+          fromResolutionOf('runtimeClasspath')
+        }
+        usage('java-runtime') {
+          fromResolutionResult()
+        }
+      }
+      pom {
+        name = 'grape'
+        description = 'High concurrency task support system'
+        url = 'https://realcpf.tech/grape.html'
+        properties = [
+        ]
+        licenses {
+          license {
+            name = 'The Apache License, Version 2.0'
+            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+        developers {
+          developer {
+            id = 'realcpf'
+            name = 'jiacheng liu'
+            email = 'realcpf@realcpf.tech'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com:real-cpf/grape.git'
+          developerConnection = 'scm:git:ssh://github.com:real-cpf/grape.git'
+          url = 'http://github.com:real-cpf/grape/'
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      name = "OSSRH"
+      if (project.version.toString().endsWith("-SNAPSHOT")) {
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots"
+      } else {
+        url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+      }
+      credentials {
+        username = findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+        password = findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+      }
+    }
+  }
+}
+
+signing {
+  sign publishing.publications.mavenJava
+}
+
+
+javadoc {
+  if(JavaVersion.current().isJava9Compatible()) {
+    options.addBooleanOption('html5', true)
+  }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+  testImplementation platform('org.junit:junit-bom:5.9.1')
+  testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
