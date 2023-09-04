@@ -7,7 +7,7 @@ plugins {
 
 group = "tech.realcpf.grape"
 archivesBaseName = "grape"
-version = "1.0-SNAPSHOT"
+version = "1.0.1"
 
 repositories {
   mavenCentral()
@@ -51,7 +51,7 @@ publishing {
         scm {
           connection = 'scm:git:git://github.com:real-cpf/grape.git'
           developerConnection = 'scm:git:ssh://github.com:real-cpf/grape.git'
-          url = 'http://github.com:real-cpf/grape/'
+          url = 'http://github.com/real-cpf/grape/'
         }
       }
     }

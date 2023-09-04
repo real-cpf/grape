@@ -4,5 +4,5 @@ build
 .gradle
 db.key
 db.data
-gradle
 podman
+tmp
