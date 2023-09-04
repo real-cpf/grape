@@ -1,0 +1,8 @@
+build
+.idea
+*.lock
+.gradle
+db.key
+db.data
+gradle
+podman
