@@ -1,11 +1,12 @@
 package tech.realcpf.core;
 
-import java.io.IOException;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+/**
+ * for stat
+ * 用于统计
+ */
 public class GLogger {
   private final String name;
   private final Level level;

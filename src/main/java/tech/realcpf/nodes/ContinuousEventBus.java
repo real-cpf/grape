@@ -1,11 +1,13 @@
 package tech.realcpf.nodes;
 
-import tech.realcpf.core.Task;
-import tech.realcpf.core.Worker;
 import tech.realcpf.eventcenter.EventBus;
+import tech.realcpf.eventcenter.GrapeExecutors;
 
 import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ContinuousEventBus extends EventBus {
@@ -13,27 +15,33 @@ public class ContinuousEventBus extends EventBus {
   private ContinuousEventBus(){
 
   }
+  private final ThreadPoolExecutor executor = GrapeExecutors.newTheExecutor();
   private final AtomicBoolean RUNNING = new AtomicBoolean(true);
   private static class ContinuousHolder {
     static ContinuousEventBus eventBus = new ContinuousEventBus();
   }
+  /**
+   * worker queue for push no busy and poll no busy
+   */
   private static BlockingQueue<ContinuousWorker> workerQueue = new ArrayBlockingQueue<>(4);
   private final Queue<NodeTask> tmpTaskQueue = new ConcurrentLinkedQueue<>();
   @Override
   public void init() {
     int i=4;
-    ExecutorService service = Executors.newFixedThreadPool(i);
+    /**
+     * 初始化存活worker,need imporove
+     */
     while (i > 0) {
       ContinuousWorker worker = new ContinuousWorker();
       try {
         workerQueue.put(worker);
-        service.execute(worker);
+        executor.execute(worker);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
       i--;
     }
-    service.shutdown();
+
   }
 
   public static ContinuousEventBus get() {
@@ -45,6 +53,9 @@ public class ContinuousEventBus extends EventBus {
   public void event() {
     while (RUNNING.get()) {
       try {
+        /**
+         * poll no busy worker
+         */
         ContinuousWorker worker = workerQueue.take();
         worker.noBusy();
         int max = 4;
@@ -55,6 +66,9 @@ public class ContinuousEventBus extends EventBus {
             break;
           }else {
             System.out.println("get task");
+            /**
+             * make the worker busy
+             */
             worker.pushTask(task);
             max--;
           }
@@ -72,6 +86,7 @@ public class ContinuousEventBus extends EventBus {
 
   public void shutdown(){
     RUNNING.compareAndSet(true,false);
+    executor.shutdown();
   }
 
   public static void reclaim(ContinuousWorker worker) {

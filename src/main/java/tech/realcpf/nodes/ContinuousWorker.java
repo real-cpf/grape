@@ -32,14 +32,9 @@ public class ContinuousWorker extends Worker {
         BUSY.compareAndSet(true,false);
         if (BUSY.get()) {
           ContinuousEventBus.reclaim(this);
-        }
-        System.out.println("not busy");
-//        LockSupport.parkNanos(100000);
-        try {
-          TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
+        }      
+       LockSupport.parkNanos(100000);
+
       }else {
         System.out.println("task run");
         task.run();
